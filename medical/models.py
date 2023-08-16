@@ -35,6 +35,9 @@ class Speciality(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name_plural = "Specialities"
+
 
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
@@ -149,7 +152,7 @@ class Medication(models.Model):
     maximum_age = models.IntegerField()
     molecule = models.ManyToManyField(Molecule, blank=True, null=True)
     therapeutic_route = models.ForeignKey(
-        TherapeuticRoute, blank=True, null=True)
+        TherapeuticRoute, on_delete=models.PROTECT, blank=True, null=True)
     medication_type = models.ForeignKey(
         MedicationType, on_delete=models.PROTECT)
     is_active = models.BooleanField(default=True)
