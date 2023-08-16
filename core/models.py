@@ -28,21 +28,22 @@ from django_countries.fields import CountryField
 
 # Create your models here.
 
+
 class Company(models.Model):
-    name = models.CharField( max_length=255)
+    name = models.CharField(max_length=255)
     acronym = models.CharField(max_length=32, unique=True)
     address = models.CharField(max_length=64, null=True)
     # logo = models.ImageField(upload_to='images')
     note = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    
-    
+
     def __str__(self):
-        return f"({self.acronym}){self.acronym}" 
+        return f"({self.acronym}){self.acronym}"
+
     class Meta:
         verbose_name_plural = _("Companies")
-    
-    
+
+
 class Exercice(models.Model):
     title = models.CharField(max_length=64)
     start_at = models.DateField()
@@ -51,44 +52,44 @@ class Exercice(models.Model):
     medication_margin = models.DecimalField(max_digits=6, decimal_places=0)
     closed = models.BooleanField(default=True)
     company = models.ForeignKey(Company, on_delete=models.RESTRICT)
-    active = models.BooleanField(default=True)
-    
+    isActive = models.BooleanField(default=True)
+
     def __str__(self):
         return f"{self.title} - {self.company.name}"
-    
+
     def save(self, *args, **kwargs):
         if self.start_at > self.end_at:
             raise ValidationError(
-                 _("The start date must be less than or equal to the end date!"),
+                _("The start date must be less than or equal to the end date!"),
             )
         super(Exercice, self).save(*args, **kwargs)
-    
+
     class Meta:
         unique_together = ('title', 'company')
-        
-        
+
+
 class Grouping(models.Model):
     name = models.CharField(max_length=64)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     note = models.TextField(null=True, blank=True)
-    active = models.BooleanField(default=True)
-    
+    isActive = models.BooleanField(default=True)
+
     def __str__(self):
         return f"{self.name} - {self.company.name}"
-    
+
     class Meta:
         unique_together = ('name', 'company')
-        
-        
+
+
 class District(models.Model):
     name = models.CharField(max_length=64)
     country = CountryField()
     note = models.TextField(null=True, blank=True)
-    active = models.BooleanField(default=True)
-    
+    isActive = models.BooleanField(default=True)
+
     def __str__(self):
         return f"{self.name} - {self.country.name}"
-    
+
     class Meta:
         unique_together = ('name', 'country')
 
@@ -98,23 +99,23 @@ class Region(models.Model):
     district = models.ForeignKey(District, on_delete=models.CASCADE)
     note = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return f"{self.name} - {self.district.name}"
-    
+
     class Meta:
-            unique_together = ('name', 'district')
+        unique_together = ('name', 'district')
 
 
 class Locality(models.Model):
     name = models.CharField(max_length=64)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
     note = models.TextField(null=True, blank=True)
-    active = models.BooleanField(default=True)
-    
+    isActive = models.BooleanField(default=True)
+
     def __str__(self):
         return f"{self.name} - {self.region.name}"
-    
+
     class Meta:
-        unique_together = ('name','region')
+        unique_together = ('name', 'region')
         verbose_name_plural = _("Localities")

@@ -30,7 +30,7 @@ from django.utils.translation import gettext_lazy as _
 class Speciality(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -42,7 +42,7 @@ class Speciality(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -56,7 +56,7 @@ class Codification(models.Model):
     label = models.CharField(max_length=64)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.code} - {self.label}"
@@ -71,7 +71,7 @@ class Pathology(models.Model):
     speciality = models.ForeignKey(Speciality, on_delete=models.PROTECT)
     is_chronic = models.BooleanField(default=False)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return self.code
@@ -93,7 +93,7 @@ class Nomenclature(models.Model):
     is_editable_price = models.BooleanField()
     is_prior_agreement = models.BooleanField()
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.code} - {self.name}"
@@ -105,7 +105,7 @@ class Nomenclature(models.Model):
 class BloodGroup(models.Model):
     name = models.CharField(max_length=2, unique=True)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -114,7 +114,7 @@ class BloodGroup(models.Model):
 class Molecule(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -123,7 +123,7 @@ class Molecule(models.Model):
 class MedicationType(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -132,7 +132,7 @@ class MedicationType(models.Model):
 class TherapeuticRoute(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField()
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -155,7 +155,7 @@ class Medication(models.Model):
         TherapeuticRoute, on_delete=models.PROTECT, blank=True, null=True)
     medication_type = models.ForeignKey(
         MedicationType, on_delete=models.PROTECT)
-    is_active = models.BooleanField(default=True)
+    isActive = models.BooleanField(default=True)
     note = models.TextField()
 
     def __str__(self):
