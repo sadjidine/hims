@@ -58,14 +58,13 @@ class Practionner(models.Model):
     gender = models.CharField(
         max_length=1, choices=GENDER_CHOICES, default=MALE)
     dateOfBirth = models.DateField(null=True, blank=True)
-    note = models.TextField()
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.lastName} - {self.firstName}"
 
     class Meta:
-        unique_together = ('firsName', 'lastName', 'dateOfBirth')
+        unique_together = ('firstName', 'lastName', 'dateOfBirth')
 
 
 class Standing(models.Model):

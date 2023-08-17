@@ -41,7 +41,7 @@ class Speciality(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -55,7 +55,7 @@ class Codification(models.Model):
     code = models.CharField(max_length=4, unique=True)
     label = models.CharField(max_length=64)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -70,7 +70,7 @@ class Pathology(models.Model):
     name = models.CharField(max_length=64, unique=True)
     speciality = models.ForeignKey(Speciality, on_delete=models.PROTECT)
     is_chronic = models.BooleanField(default=False)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -92,7 +92,7 @@ class Nomenclature(models.Model):
         help_text="Is quantity is required for this service?")
     is_editable_price = models.BooleanField()
     is_prior_agreement = models.BooleanField()
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -104,7 +104,7 @@ class Nomenclature(models.Model):
 
 class BloodGroup(models.Model):
     name = models.CharField(max_length=2, unique=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -113,7 +113,7 @@ class BloodGroup(models.Model):
 
 class Molecule(models.Model):
     name = models.CharField(max_length=64, unique=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -122,7 +122,7 @@ class Molecule(models.Model):
 
 class MedicationType(models.Model):
     name = models.CharField(max_length=64, unique=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
@@ -150,13 +150,13 @@ class Medication(models.Model):
     waiting_period = models.IntegerField()
     minimum_age = models.IntegerField()
     maximum_age = models.IntegerField()
-    molecule = models.ManyToManyField(Molecule, blank=True, null=True)
+    molecule = models.ManyToManyField(Molecule)
     therapeutic_route = models.ForeignKey(
         TherapeuticRoute, on_delete=models.PROTECT, blank=True, null=True)
     medication_type = models.ForeignKey(
         MedicationType, on_delete=models.PROTECT)
     isActive = models.BooleanField(default=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}({self.descrcodeiption})"
