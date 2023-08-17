@@ -58,6 +58,8 @@ class Practionner(models.Model):
     gender = models.CharField(
         max_length=1, choices=GENDER_CHOICES, default=MALE)
     dateOfBirth = models.DateField(null=True, blank=True)
+    note = models.TextField()
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.lastName} - {self.firstName}"
@@ -67,4 +69,7 @@ class Practionner(models.Model):
 
 
 class Standing(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True)
+    rank = models.IntegerField(default=1,)
+    note = models.TextField()
+    isActive = models.BooleanField(default=True)

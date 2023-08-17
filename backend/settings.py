@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django_countries',
     'core',
     'medical',
-    'insurance'
+    'insurance',
 ]
 
 MIDDLEWARE = [
