@@ -29,11 +29,11 @@ from django.utils.translation import gettext_lazy as _
 
 class Speciality(models.Model):
     name = models.CharField(max_length=64, unique=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     class Meta:
         verbose_name_plural = "Specialities"
@@ -45,7 +45,7 @@ class Category(models.Model):
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     class Meta:
         verbose_name_plural = "Categories"

@@ -33,7 +33,7 @@ class Degree(models.Model):
     name = models.CharField(max_length=64, unique=True,
                             verbose_name=_('Degree name'))
     isActive = models.BooleanField(default=True)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -59,6 +59,7 @@ class Practionner(models.Model):
         max_length=1, choices=GENDER_CHOICES, default=MALE)
     dateOfBirth = models.DateField(null=True, blank=True)
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.lastName} - {self.firstName}"
@@ -70,5 +71,5 @@ class Practionner(models.Model):
 class Standing(models.Model):
     name = models.CharField(max_length=64, unique=True)
     rank = models.IntegerField(default=1,)
-    note = models.TextField()
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)

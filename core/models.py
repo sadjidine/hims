@@ -38,7 +38,7 @@ class Company(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"({self.acronym}){self.acronym}"
+        return self.acronym
 
     class Meta:
         verbose_name_plural = _("Companies")
@@ -75,7 +75,7 @@ class Grouping(models.Model):
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} - {self.company.name}"
+        return f"{self.name} - {self.company.acronym}"
 
     class Meta:
         unique_together = ('name', 'company')
