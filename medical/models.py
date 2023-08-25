@@ -23,6 +23,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django_countries.fields import CountryField
 
 # Create your models here.
 STAR_ONE = 0
@@ -97,13 +98,18 @@ class Nomenclature(models.Model):
     name = models.CharField(max_length=64, unique=True)
     codification = models.ForeignKey(Codification, on_delete=models.PROTECT)
     coefficient = models.IntegerField(default=1)
-    waiting_period = models.IntegerField()
-    minimum_age = models.IntegerField()
-    maximum_age = models.IntegerField()
-    is_quantity_required = models.BooleanField(
-        help_text="Is quantity is required for this service?")
-    is_editable_price = models.BooleanField()
-    is_prior_agreement = models.BooleanField()
+    serviceTimeout = models.IntegerField(
+        _('Service Timeout'), help_text=_('Service waiting delay in days.'))
+    minimumAge = models.IntegerField(_('Minimum age'), help_text=_(
+        'minimum age requirement allowed of this service'))
+    maximumAge = models.IntegerField(_('Maximum age'), help_text=_(
+        'maximum age requirement allowed of this service'))
+    isRequiredQuantity = models.BooleanField(
+        help_text="Is quantity required for this service?")
+    isPriceRequired = models.BooleanField(
+        _('Price Required'), help_text=_('Price required for this service?'), default=True)
+    isPriorAgreement = models.BooleanField(_('Prior agreement'), help_text=_(
+        'Prior agreement is required for this service?'))
     note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
@@ -148,11 +154,13 @@ class Medication(models.Model):
         max_length=64, help_text="International NonProprietary Code")
     dosage = models.CharField(
         max_length=64, help_text="Set the dosage of the pharmaceutical product")
-    indicativePrice = models.DecimalField(max_digits=9, decimal_places=0)
-    priceMargin = models.DecimalField(max_digits=9, decimal_places=0)
-    waitingPeriod = models.IntegerField()
-    minimumAge = models.IntegerField()
-    maximumAge = models.IntegerField()
+    indicativePrice = models.DecimalField(
+        max_digits=9, decimal_places=0, default=0)
+    priceMargin = models.DecimalField(
+        max_digits=9, decimal_places=0, default=0)
+    waitingPeriod = models.PositiveSmallIntegerField()
+    minimumAge = models.PositiveSmallIntegerField()
+    maximumAge = models.PositiveSmallIntegerField()
     molecule = models.ManyToManyField(Molecule)
     therapeuticRoute = models.ForeignKey(
         TherapeuticRoute, on_delete=models.PROTECT, blank=True, null=True)
@@ -196,6 +204,8 @@ class Practionner(models.Model):
         Speciality, on_delete=models.PROTECT, null=True, blank=True)
     gender = models.IntegerField(choices=GENDER_CHOICES, default=None)
     dateOfBirth = models.DateField(null=True, blank=True)
+    mobile = models.CharField(max_length=10, blank=True, null=True)
+    email = models.EmailField(null=True, blank=True)
     isActive = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
@@ -204,3 +214,41 @@ class Practionner(models.Model):
 
     class Meta:
         unique_together = ('firstName', 'lastName', 'dateOfBirth')
+
+
+class HealthCenter(models.Model):
+    name = models.CharField(max_length=255)
+    acronym = models.CharField(max_length=32, unique=True)
+    country = CountryField()
+    address = models.CharField(max_length=64, null=True)
+    # logo = models.ImageField(upload_to='images')
+    mobile = models.CharField(max_length=10, blank=True, null=True)
+    email = models.EmailField(null=True, blank=True)
+    staff = models.ManyToManyField(Practionner, blank=True)
+    create_at = models.DateField(
+        _('Creation Date'), auto_now_add=True)
+    modified_at = models.DateField(_('Modified Date'), auto_now=True)
+    isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.acronym
+
+    class Meta:
+        unique_together = ('acronym', 'country')
+
+
+class Service(models.Model):
+    healthcenter = models.ForeignKey(
+        HealthCenter, on_delete=models.RESTRICT, related_name='services')
+    nomenclature = models.ForeignKey(Nomenclature, on_delete=models.RESTRICT)
+    unitPrice = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    insurancePart = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
+    insuredPart = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
+    create_at = models.DateField(
+        _('Creation Date'), auto_now_add=True)
+    modified_at = models.DateField(_('Modified Date'), auto_now=True)
+    isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)

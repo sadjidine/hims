@@ -32,6 +32,7 @@ from django_countries.fields import CountryField
 class Company(models.Model):
     name = models.CharField(max_length=255)
     acronym = models.CharField(max_length=32, unique=True)
+    country = CountryField()
     address = models.CharField(max_length=64, null=True)
     # logo = models.ImageField(upload_to='images')
     note = models.TextField(null=True, blank=True)

@@ -59,8 +59,8 @@ class Subscriber(models.Model):
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
-    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.lastName} {self.firstName}"
@@ -159,8 +159,8 @@ class Assign(models.Model):
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
-    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.lastName} {self.firstName}"

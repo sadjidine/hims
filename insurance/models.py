@@ -40,14 +40,14 @@ class SubscriptionPlan(models.Model):
     HALFYEAR = 5
     YEAR = 6
 
-    FEES_CYCLE_CHOICES = [
+    PREMIUM_CYCLE_CHOICES = [
         (DAY, _('Daily')),
         (WEEK, _('Weekly')),
         (FORTNIGHT, _('Fortnight')),
         (MONTH, _('Monthly')),
         (QUATER, _('Quaterly')),
         (HALFYEAR, _('Half-yearly')),
-        (YEAR, _('Yearly')),
+        (YEAR, _('Yearly'))
     ]
 
     STAR_ONE = 0
@@ -67,31 +67,30 @@ class SubscriptionPlan(models.Model):
     label = models.CharField(_('Label'), max_length=255)
     company = models.ForeignKey(
         Company, on_delete=models.RESTRICT, related_name='policies')
-    validityDelay = models.PositiveIntegerField(
+    validityDelay = models.PositiveSmallIntegerField(
         _('Validity'), help_text='Medical Care Validity Delay!')
     standing = models.IntegerField(
         _('Standing'), choices=STANDING_CHOICES, default=None)
-    delayAmount = models.DecimalField(
-        _('Delay Amount'), max_digits=6, decimal_places=0)
     isGenderControl = models.BooleanField(_('Is Gender Control'), default=True)
-    waitingPeriod = models.PositiveIntegerField(_('Waiting Period'))
+    waitingDelay = models.PositiveSmallIntegerField(
+        _('Waiting Delay'), default=0, help_text=_('Waiting delay in days.'))
     individualCeiling = models.DecimalField(
         _('Individual Ceiling'), max_digits=9, decimal_places=0)
     familyCeiling = models.DecimalField(
         _('Family Ceiling'), max_digits=9, decimal_places=0)
-    publicCoverage = models.PositiveIntegerField(_('Public Coverage'), validators=[
-                                                 MinValueValidator(0), MaxValueValidator(100)])
-    privateCoverage = models.PositiveIntegerField(_('Private Coverage'), validators=[
-                                                  MinValueValidator(0), MaxValueValidator(100)])
-    publicCoverage = models.PositiveIntegerField(_('Public Coverage'), validators=[
-                                                 MinValueValidator(0), MaxValueValidator(100)])
-    publicClaim = models.PositiveIntegerField(_('Public Claim'), validators=[MinValueValidator(
+    publicCoverage = models.PositiveSmallIntegerField(_('Public Coverage'), validators=[
+        MinValueValidator(0), MaxValueValidator(100)])
+    privateCoverage = models.PositiveSmallIntegerField(_('Private Coverage'), validators=[
+        MinValueValidator(0), MaxValueValidator(100)])
+    publicCoverage = models.PositiveSmallIntegerField(_('Public Coverage'), validators=[
+        MinValueValidator(0), MaxValueValidator(100)])
+    publicClaim = models.PositiveSmallIntegerField(_('Public Claim'), validators=[MinValueValidator(
         0), MaxValueValidator(100)])  # Remboursement Public Zone couverte
-    privateClaim = models.PositiveIntegerField(_('Private Claim'), validators=[MinValueValidator(
+    privateClaim = models.PositiveSmallIntegerField(_('Private Claim'), validators=[MinValueValidator(
         0), MaxValueValidator(100)])  # Remboursement Privé Zone couverte
-    claimDelay = models.PositiveIntegerField(
+    claimDelay = models.PositiveSmallIntegerField(
         _('Claim Delay'), help_text='Delay in days')
-    maxClaim = models.PositiveIntegerField(
+    maxClaim = models.PositiveSmallIntegerField(
         _('Max Claim'), help_text='Maximum number of claims allowed')
     claimCeilling = models.DecimalField(
         _('Claim Ceilling'), max_digits=9, decimal_places=0, help_text='Claim Ceilling Amount')
@@ -99,28 +98,30 @@ class SubscriptionPlan(models.Model):
         _('Individual Claim Ceiling'), max_digits=9, decimal_places=0, help_text='Individual Claim Ceiling Amount')
     familyClaimCeiling = models.DecimalField(
         _('Family Claim Ceiling'), max_digits=9, decimal_places=0, help_text='Family Claim Ceiling Amount')
-    memberAgeLimit = models.PositiveIntegerField(
+    memberAgeLimit = models.PositiveSmallIntegerField(
         _('Member Age Limit'), help_text='Member Age Limit allowance')
-    childAgeLimit = models.PositiveIntegerField(
+    childAgeLimit = models.PositiveSmallIntegerField(
         _('Child Age Limit'), help_text='Child Age Limit allowance')
-    additionalChild = models.PositiveIntegerField(
+    additionalChild = models.PositiveSmallIntegerField(
         _('Additional Child'), help_text=_('Allowed Child Limited Number allowed!'))
-    childMaxi = models.PositiveIntegerField(
+    childMaxi = models.PositiveSmallIntegerField(
         _('Maximum Child'), help_text=_('Allowed Child Limited Number allowed!'))
-    childMajority = models.PositiveIntegerField(
+    childMajority = models.PositiveSmallIntegerField(
         _('Child Majority Age'), help_text='Majority Age of child')
-    spouseAgeLimit = models.PositiveIntegerField(
+    spouseAgeLimit = models.PositiveSmallIntegerField(
         _('Spouse Age Limit'), help_text='Spouse Age Limit allowance')
-    additionalSpouse = models.PositiveIntegerField(
+    additionalSpouse = models.PositiveSmallIntegerField(
         _('Additional Spouse'), help_text=_('Allowed Spouse Limited Number allowed!'))
-    spouseMaxi = models.PositiveIntegerField(
+    spouseMaxi = models.PositiveSmallIntegerField(
         _('Maximum Spouse'), help_text=_('Allowed Spouse Limited Number allowed!'))
     insurancePremium = models.DecimalField(
         _('Insurance Premium'), max_digits=9, decimal_places=0)
     premiumCycle = models.IntegerField(
-        _('Premium Cycle'), choices=FEES_CYCLE_CHOICES, default=None)
-    note = models.TextField(blank=True, null=True)
+        _('Premium Cycle'), choices=PREMIUM_CYCLE_CHOICES, default=None)
+    minToleratedAmount = models.DecimalField(
+        _('Min. Tolerated Amount'), max_digits=6, decimal_places=0, default=0)
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.label
@@ -165,23 +166,23 @@ class PlanCategory(models.Model):
     relationship = models.IntegerField(
         _('Relationship'), choices=RELATIONSHIP_CHOICES, default=None)
     isTicketDue = models.BooleanField(_('Is Ticket Due'), default=True)
-    individualMaxiService = models.PositiveIntegerField(
+    individualMaxiService = models.PositiveSmallIntegerField(
         _('Maxi Svce/Person'), help_text=_('Maximum number services per Person'))
-    familyMaxiService = models.PositiveIntegerField(
+    familyMaxiService = models.PositiveSmallIntegerField(
         _('Maxi Svce/Family'), help_text=_('Maximum nummber services per family'))
     personalCeiling = models.DecimalField(
         _('Ceiling/Person'), max_digits=9, decimal_places=0)
     familyCeiling = models.DecimalField(
         _('Ceiling/Ceiling'), max_digits=9, decimal_places=0)
-    ageLimit = models.PositiveIntegerField(_('Age limit'), help_text=_(
+    ageLimit = models.PositiveSmallIntegerField(_('Age limit'), help_text=_(
         'Age limitation for allowing the service'), default=0)
-    waitingDelay = models.PositiveIntegerField(_('Waiting delay'), help_text=_(
+    waitingDelay = models.PositiveSmallIntegerField(_('Waiting delay'), help_text=_(
         'Delay between two (2) services in days!'))
-    serviceTimeOut = models.PositiveIntegerField(_('Timeout'), help_text=_(
+    serviceTimeOut = models.PositiveSmallIntegerField(_('Timeout'), help_text=_(
         'Waiting delay after registering in days!'))
-    sStrict = models.BooleanField(_('Is strict'), default=False)
-    note = models.TextField(blank=True, null=True)
+    isStrict = models.BooleanField(_('Is strict'), default=False)
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.category.name
@@ -194,23 +195,23 @@ class PlanCodification(models.Model):
     subscriptionPlan = models.ForeignKey(
         SubscriptionPlan, on_delete=models.RESTRICT)
     codification = models.ForeignKey(Codification, on_delete=models.RESTRICT)
-    publicRate = models.PositiveIntegerField(_('Public Rate'), validators=[
-                                             MinValueValidator(1), MaxValueValidator(100)])
-    privateRate = models.PositiveIntegerField(_('Private Rate'), validators=[
-                                              MinValueValidator(1), MaxValueValidator(100)])
-    claimRate = models.PositiveIntegerField(_('Claim Rate'), validators=[
-                                            MinValueValidator(1), MaxValueValidator(100)])
+    publicRate = models.PositiveSmallIntegerField(_('Public Rate'), validators=[
+        MinValueValidator(1), MaxValueValidator(100)])
+    privateRate = models.PositiveSmallIntegerField(_('Private Rate'), validators=[
+        MinValueValidator(1), MaxValueValidator(100)])
+    claimRate = models.PositiveSmallIntegerField(_('Claim Rate'), validators=[
+        MinValueValidator(1), MaxValueValidator(100)])
     individualCeiling = models.DecimalField(
         _('Indidual Ceiling'), max_digits=9, decimal_places=0)
     familyCeiling = models.DecimalField(
         _('Family Ceiling'), max_digits=9, decimal_places=0)
     ceilingAmount = models.DecimalField(
         _('Ceiling Amount'), max_digits=9, decimal_places=0)
-    waitingDelay = models.PositiveIntegerField(
+    waitingDelay = models.PositiveSmallIntegerField(
         _('Waiting Delay'), help_text=_('Waiting delay in days.'))
     isStrict = models.BooleanField(_('Is strict'), default=False)
-    note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.codification.code
