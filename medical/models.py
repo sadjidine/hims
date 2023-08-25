@@ -25,6 +25,18 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+STAR_ONE = 0
+STAR_TWO = 1
+STAR_THREE = 2
+STAR_FOUR = 3
+STAR_FIVE = 4
+STANDING_CHOICES = [
+    (STAR_ONE, '*'),
+    (STAR_TWO, '**'),
+    (STAR_THREE, '***'),
+    (STAR_FOUR, '****'),
+    (STAR_FIVE, '*****')
+]
 
 
 class Speciality(models.Model):
@@ -102,22 +114,13 @@ class Nomenclature(models.Model):
         unique_together = ('code', 'name')
 
 
-class BloodGroup(models.Model):
-    name = models.CharField(max_length=2, unique=True)
-    note = models.TextField(blank=True, null=True)
-    isActive = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.name}"
-
-
 class Molecule(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField(blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return self.name
 
 
 class MedicationType(models.Model):
@@ -126,7 +129,7 @@ class MedicationType(models.Model):
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return self.name
 
 
 class TherapeuticRoute(models.Model):
@@ -135,7 +138,7 @@ class TherapeuticRoute(models.Model):
     isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return self.name
 
 
 class Medication(models.Model):
@@ -145,15 +148,15 @@ class Medication(models.Model):
         max_length=64, help_text="International NonProprietary Code")
     dosage = models.CharField(
         max_length=64, help_text="Set the dosage of the pharmaceutical product")
-    indicative_price = models.DecimalField(max_digits=9, decimal_places=0)
-    price_margin = models.DecimalField(max_digits=9, decimal_places=0)
-    waiting_period = models.IntegerField()
-    minimum_age = models.IntegerField()
-    maximum_age = models.IntegerField()
+    indicativePrice = models.DecimalField(max_digits=9, decimal_places=0)
+    priceMargin = models.DecimalField(max_digits=9, decimal_places=0)
+    waitingPeriod = models.IntegerField()
+    minimumAge = models.IntegerField()
+    maximumAge = models.IntegerField()
     molecule = models.ManyToManyField(Molecule)
-    therapeutic_route = models.ForeignKey(
+    therapeuticRoute = models.ForeignKey(
         TherapeuticRoute, on_delete=models.PROTECT, blank=True, null=True)
-    medication_type = models.ForeignKey(
+    medicationType = models.ForeignKey(
         MedicationType, on_delete=models.PROTECT)
     isActive = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
@@ -162,4 +165,42 @@ class Medication(models.Model):
         return f"{self.name}({self.descrcodeiption})"
 
     class Meta:
-        unique_together = ('name', 'medication_type', 'therapeutic_route')
+        unique_together = ('name', 'medicationType', 'therapeuticRoute')
+
+
+class Degree(models.Model):
+    name = models.CharField(max_length=64, unique=True,
+                            verbose_name=_('Degree name'))
+    isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Practionner(models.Model):
+
+    MALE = 0
+    FEMALE = 1
+    GENDER_CHOICES = [
+        (MALE, _('Male')),
+        (FEMALE, _('Female')),
+    ]
+
+    CorpReference = models.CharField(max_length=32)
+    firstName = models.CharField(max_length=32)
+    lastName = models.CharField(max_length=128)
+    degree = models.ForeignKey(
+        Degree, on_delete=models.PROTECT, null=True, blank=True)
+    speciality = models.ForeignKey(
+        Speciality, on_delete=models.PROTECT, null=True, blank=True)
+    gender = models.IntegerField(choices=GENDER_CHOICES, default=None)
+    dateOfBirth = models.DateField(null=True, blank=True)
+    isActive = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.lastName} - {self.firstName}"
+
+    class Meta:
+        unique_together = ('firstName', 'lastName', 'dateOfBirth')
