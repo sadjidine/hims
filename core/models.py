@@ -36,7 +36,7 @@ class Company(models.Model):
     address = models.CharField(max_length=64, null=True)
     # logo = models.ImageField(upload_to='images')
     note = models.TextField(null=True, blank=True)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.acronym
@@ -53,7 +53,7 @@ class Exercice(models.Model):
     medication_margin = models.DecimalField(max_digits=6, decimal_places=0)
     closed = models.BooleanField(default=True)
     company = models.ForeignKey(Company, on_delete=models.RESTRICT)
-    isActive = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.title} - {self.company.name}"
@@ -73,7 +73,7 @@ class Grouping(models.Model):
     name = models.CharField(max_length=64)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     note = models.TextField(null=True, blank=True)
-    isActive = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} - {self.company.acronym}"
@@ -86,7 +86,7 @@ class District(models.Model):
     name = models.CharField(max_length=64)
     country = CountryField()
     note = models.TextField(null=True, blank=True)
-    isActive = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} - {self.country.name}"
@@ -99,7 +99,7 @@ class Region(models.Model):
     name = models.CharField(max_length=64)
     district = models.ForeignKey(District, on_delete=models.CASCADE)
     note = models.TextField(null=True, blank=True)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} - {self.district.name}"
@@ -112,7 +112,7 @@ class Locality(models.Model):
     name = models.CharField(max_length=64)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
     note = models.TextField(null=True, blank=True)
-    isActive = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} - {self.region.name}"
