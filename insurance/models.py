@@ -274,6 +274,7 @@ class Subscriber(models.Model):
     mobile = models.CharField(max_length=10, blank=True, null=True)
     # deceased_at = models.DateField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True, upload_to='photos')
     """ create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True) """
@@ -375,6 +376,7 @@ class Assign(models.Model):
         Grouping, on_delete=models.SET_NULL, null=True, blank=True)
     blood_group = models.IntegerField(
         choices=BLOOD_GRP_CHOICES, default=None, null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True, upload_to='photos')
     mobile = models.CharField(max_length=10, blank=True, null=True)
     # deceased_at = models.DateField(_('Deceased at'), null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
@@ -408,6 +410,7 @@ class Scholarship(models.Model):
     end_date = models.DateField(_('end date'))
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
+    document = models.FileField(upload_to='documents')
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)
 
@@ -434,4 +437,5 @@ class Decease(models.Model):
     assisgn = models.ForeignKey(
         Assign, on_delete=models.RESTRICT, blank=True, null=True)
     deceased_at = models.DateField(_('Deceased at'))
+    document = models.FileField(upload_to='documents')
     note = models.TextField(blank=True, null=True)

@@ -34,7 +34,7 @@ class Company(models.Model):
     acronym = models.CharField(max_length=32, unique=True)
     country = CountryField()
     address = models.CharField(max_length=64, null=True)
-    # logo = models.ImageField(upload_to='images')
+    logo = models.ImageField(upload_to='images')
     note = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
 

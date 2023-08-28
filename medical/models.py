@@ -215,6 +215,9 @@ class Practitioner(models.Model):
     def __str__(self):
         return f"{self.last_name} - {self.first_name}"
 
+    def full_name(self):
+        return f"{self.last_name} - {self.first_name}"
+
     class Meta:
         unique_together = ('first_name', 'last_name', 'date_of_birth')
 
@@ -241,11 +244,19 @@ class HealthCenter(models.Model):
         (STAR_FOUR, '****'),
         (STAR_FIVE, '*****')
     ]
-
+    MRC = 0
+    SRC = 1
+    PHARMACY = 2
+    STATUS_CHOICES = [
+        (MRC, _('Mandatory Referral Center')),
+        (SRC, _('Standard Referral Center')),
+        (PHARMACY, _('Pharmacy'))
+    ]
     name = models.CharField(max_length=255)
     acronym = models.CharField(max_length=32, unique=True)
     center_type = models.ForeignKey(
         CenterType, on_delete=models.RESTRICT, blank=True)
+    status = models.IntegerField(choices=STATUS_CHOICES)
     standing = models.IntegerField(
         _('Standing'), choices=STANDING_CHOICES, default=None)
     country = CountryField()
@@ -253,7 +264,7 @@ class HealthCenter(models.Model):
     # logo = models.ImageField(upload_to='images')
     mobile = models.CharField(max_length=10, blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
-    staff = models.ManyToManyField(Practitioner, blank=True)
+    # staff = models.ManyToManyField(Practitioner, blank=True)
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
@@ -267,9 +278,23 @@ class HealthCenter(models.Model):
         unique_together = ('acronym', 'country')
 
 
+class Staff(models.Model):
+    healthcenter = models.ForeignKey(HealthCenter, verbose_name=_(
+        'Health Center'), on_delete=models.RESTRICT)
+    practitioner = models.ForeignKey(Practitioner, on_delete=models.RESTRICT)
+    create_at = models.DateField(
+        _('Creation Date'), auto_now_add=True)
+    modified_at = models.DateField(_('Modified Date'), auto_now=True)
+    is_active = models.BooleanField(default=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.practitioner__full_name} - {self.healthcenter__name}"
+
+
 class Service(models.Model):
-    healthcenter = models.ForeignKey(
-        HealthCenter, on_delete=models.RESTRICT, related_name='services')
+    healthcenter = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT, verbose_name=_(
+        'Health Center'), related_name='services', limit_choices_to={'status__icontains': 'Referral'})
     nomenclature = models.ForeignKey(Nomenclature, on_delete=models.RESTRICT)
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
@@ -291,6 +316,9 @@ class Service(models.Model):
     is_active = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return self.nomenclature__name
+
 
 class HealthCare(models.Model):
     subscriber = models.ForeignKey(
@@ -300,6 +328,8 @@ class HealthCare(models.Model):
     doc_reference = models.CharField(
         _('Doc. Reference'), max_length=24, blank=True, null=True)
     mr_center = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT)
+    staff = models.ForeignKey(Staff, on_delete=models.RESTRICT)
+    pathology = models.ForeignKey(Pathology, on_delete=models.RESTRICT)
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
@@ -332,6 +362,8 @@ class HealthCareItem(models.Model):
 
 class MedicationItem(models.Model):
     healthcare = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
+    pharmacy = models.ForeignKey(
+        HealthCenter, on_delete=models.RESTRICT, limit_choices_to={'status': 2})
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     medication = models.ForeignKey(
