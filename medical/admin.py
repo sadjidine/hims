@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from medical.models import MedicineCategory, Speciality, Codification, Pathology, \
     Nomenclature, Molecule, MedicationType, TherapeuticRoute, Medication, \
-    CenterType, HealthCenter, Service, Practitioner, HealthCare, HealthCareItem, MedicationItem, Staff
+    CenterType, HealthCenter, Service, Practitioner, MedicalCare, CareItem, MedicationItem, Staff
 
 
 @admin.register(Speciality)
@@ -86,7 +86,7 @@ class ServiceAdmin(ImportExportModelAdmin):
 
 
 class HealthCareItemInline(admin.TabularInline):
-    model = HealthCareItem
+    model = CareItem
     extra = 0
 
 
@@ -95,6 +95,6 @@ class MedicationItemInline(admin.StackedInline):
     extra = 1
 
 
-@admin.register(HealthCare)
+@admin.register(MedicalCare)
 class HealthCareAdmin(ImportExportModelAdmin):
     inlines = [HealthCareItemInline, MedicationItemInline]

@@ -415,11 +415,14 @@ class Scholarship(models.Model):
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.assign.fullName
+        return self.assign__full_name
 
 
 class Suspension(models.Model):
-    assign = models.ForeignKey(Assign, on_delete=models.RESTRICT)
+    subscriber = models.ForeignKey(
+        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
+    assign = models.ForeignKey(
+        Assign, on_delete=models.RESTRICT, blank=True, null=True)
     start_date = models.DateField(_('begin date'))
     end_date = models.DateField(_('end date'))
     reason = models.TextField(_('Suspension Reason'))
@@ -429,13 +432,63 @@ class Suspension(models.Model):
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.assign.fullName
+        if self.subscriber:
+            return self.subscriber__full_name
+        if self.assign:
+            return self.assign__full_name
 
 
 class Decease(models.Model):
-    subscriber = models.ForeignKey(Subscriber, on_delete=models.RESTRICT)
+    subscriber = models.ForeignKey(
+        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
     assisgn = models.ForeignKey(
         Assign, on_delete=models.RESTRICT, blank=True, null=True)
     deceased_at = models.DateField(_('Deceased at'))
     document = models.FileField(upload_to='documents')
     note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        if self.subscriber:
+            return self.subscriber__full_name
+        if self.assign:
+            return self.assign__full_name
+
+
+class Claim(models.Model):
+    subscriber = models.ForeignKey(Subscriber, on_delete=models.RESTRICT)
+    doc_reference = models.CharField(
+        _('Doc. Reference'), max_length=24, blank=True, null=True)
+    requested_at = models.DateField(
+        _('Requested Date'))
+    create_at = models.DateField(
+        _('Creation Date'), auto_now_add=True)
+    modified_at = models.DateField(_('Modified Date'), auto_now=True)
+
+    def __str__(self):
+        return self.subscriber.full_name
+
+
+class ClainItem(models.Model):
+    claim = models.ForeignKey(Claim, on_delete=models.RESTRICT)
+    subscriber = models.ForeignKey(
+        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
+    assign = models.ForeignKey(
+        Assign, on_delete=models.RESTRICT, blank=True, null=True)
+    care_center = models.CharField(max_length=255)
+    pathology = models.ForeignKey(
+        to='medical.Pathology', on_delete=models.RESTRICT)
+    care_service = models.ForeignKey(
+        to='medical.Nomenclature', on_delete=models.RESTRICT)
+    quantity = models.PositiveSmallIntegerField(default=0)
+    unit_price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
+    create_at = models.DateField(
+        _('Creation Date'), auto_now_add=True, editable=True)
+    modified_at = models.DateField(_('Modified Date'), auto_now=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        if self.subscriber:
+            return self.subscriber.full_name
+        if self.assign:
+            return self.assign.full_name

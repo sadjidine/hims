@@ -209,6 +209,7 @@ class Practitioner(models.Model):
     date_of_birth = models.DateField(null=True, blank=True)
     mobile = models.CharField(max_length=10, blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True, upload_to='photos')
     is_active = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
@@ -320,15 +321,14 @@ class Service(models.Model):
         return self.nomenclature__name
 
 
-class HealthCare(models.Model):
+class MedicalCare(models.Model):
     subscriber = models.ForeignKey(
         Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
     assign = models.ForeignKey(
         Assign, on_delete=models.RESTRICT, blank=True, null=True)
     doc_reference = models.CharField(
         _('Doc. Reference'), max_length=24, blank=True, null=True)
-    mr_center = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT)
-    staff = models.ForeignKey(Staff, on_delete=models.RESTRICT)
+    care_center = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT)
     pathology = models.ForeignKey(Pathology, on_delete=models.RESTRICT)
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
@@ -342,10 +342,11 @@ class HealthCare(models.Model):
             return self.assign.full_name
 
 
-class HealthCareItem(models.Model):
-    healthcare = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
+class CareItem(models.Model):
+    healthcare = models.ForeignKey(MedicalCare, on_delete=models.RESTRICT)
     service = models.ForeignKey(
         Service, on_delete=models.RESTRICT, blank=True, null=True)
+    staff = models.ForeignKey(Staff, on_delete=models.RESTRICT)
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     quantity = models.PositiveSmallIntegerField(default=0)
@@ -361,7 +362,7 @@ class HealthCareItem(models.Model):
 
 
 class MedicationItem(models.Model):
-    healthcare = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
+    healthcare = models.ForeignKey(MedicalCare, on_delete=models.RESTRICT)
     pharmacy = models.ForeignKey(
         HealthCenter, on_delete=models.RESTRICT, limit_choices_to={'status': 2})
     supplied_at = models.DateField(

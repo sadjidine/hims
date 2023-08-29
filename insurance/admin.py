@@ -1,19 +1,30 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 
-from insurance.models import SubscriptionPlan, PlanCategory, PlanCodification, Subscriber, Police, Assign, Scholarship, Suspension, Decease
+from insurance.models import SubscriptionPlan, PlanCategory, PlanCodification, Subscriber, Police, Assign, Scholarship, Suspension, Decease, Claim, ClainItem
 
 
 # Register your models here.
 @admin.register(Subscriber)
 class SubscriberAdmin(ImportExportModelAdmin):
     list_display = ('id_code', 'full_name', 'matricule',
-                    'date_of_birth', 'age', 'mobile', 'email')
+                    'gender', 'age', 'mobile', 'email')
+
+
+@admin.register(Assign)
+class AssignAdmin(admin.ModelAdmin):
+    list_display = ('id_code', 'full_name', 'gender', 'age',
+                    'relationship', 'mobile', 'email')
+
+
+class AssignInline(admin.TabularInline):
+    model = Assign
+    extra = 0
 
 
 @admin.register(Police)
 class PoliceAdmin(admin.ModelAdmin):
-    pass
+    inlines = [AssignInline]
 
 
 @admin.register(Scholarship)
@@ -43,3 +54,13 @@ class PlanCodificationInline(admin.TabularInline):
 @admin.register(SubscriptionPlan)
 class SubscriptionPlanAdmin(admin.ModelAdmin):
     inlines = [PlanCategoryInline, PlanCodificationInline]
+
+
+class ClaimItemInline(admin.TabularInline):
+    model = ClainItem
+    extra = 0
+
+
+@admin.register(Claim)
+class claimAdmin(admin.ModelAdmin):
+    inlines = [ClaimItemInline]
