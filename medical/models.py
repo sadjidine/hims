@@ -239,11 +239,11 @@ class HealthCenter(models.Model):
     STAR_FOUR = 3
     STAR_FIVE = 4
     STANDING_CHOICES = [
-        (STAR_ONE, '*'),
-        (STAR_TWO, '**'),
-        (STAR_THREE, '***'),
-        (STAR_FOUR, '****'),
-        (STAR_FIVE, '*****')
+        (STAR_ONE, '★'),
+        (STAR_TWO, '★★'),
+        (STAR_THREE, '★★★'),
+        (STAR_FOUR, '★★★★'),
+        (STAR_FIVE, '★★★★★')
     ]
     MRC = 0
     SRC = 1

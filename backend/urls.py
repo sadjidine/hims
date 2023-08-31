@@ -18,8 +18,14 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
+from django.utils.translation import gettext_lazy as _
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+admin.site.site_header = _(
+    'Proximaas - HIMS (HealthCare Insurance Management System)')
+admin.site.site_title = _('Proximaas Administration')
+admin.site.index_title = _('HIMS - Admin Management')

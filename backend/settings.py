@@ -71,7 +71,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -133,12 +133,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = 'static/'
+STATIC_ROOT = BASE_DIR / 'static/'
 # Add this in your settings.py file:
 STATICFILES_DIRS = [
-    BASE_DIR / "staticfiles",
-    # "/var/www/static/",
+    BASE_DIR / "staticfiles"
 ]
+#     # "/var/www/static/",
+# ]
 
 # STATIC_URL = 'static/'
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]

@@ -88,11 +88,11 @@ class SubscriptionPlan(models.Model):
     STAR_FOUR = 3
     STAR_FIVE = 4
     STANDING_CHOICES = [
-        (STAR_ONE, '*'),
-        (STAR_TWO, '**'),
-        (STAR_THREE, '***'),
-        (STAR_FOUR, '****'),
-        (STAR_FIVE, '*****')
+        (STAR_ONE, '★'),
+        (STAR_TWO, '★★'),
+        (STAR_THREE, '★★★'),
+        (STAR_FOUR, '★★★★'),
+        (STAR_FIVE, '★★★★★')
     ]
 
     name = models.CharField(_('Name'), max_length=64)
@@ -290,20 +290,21 @@ class Subscriber(models.Model):
     def age(self):
         now = datetime.now()
         dob = self.date_of_birth
-        dod = self.deceased_at
-        if dod is not None:
-            delta = relativedelta(dod, dob)
-        else:
-            delta = relativedelta(now, dob)
+        # dod = self.deceased_at
+        # if dod is not None:
+        #     delta = relativedelta(dod, dob)
+        delta = relativedelta(now, dob)
         return delta.years
 
     def save(self, *args, **kwargs):
         # 'department' is ForeignKey, has a 'code' field consisting of a 2-3 letter code.
-        loc = str(self.locality.name[0:2])
+
+        initials = str(self.first_name.strip())[
+            0:1] + str(self.last_name.strip())[0:1]
         # gets the last 2 digits from the project start date year.
         # yy = str(self.create_at.year)[-2:]
         # makes a database query to find any matching Dept-Year combination in the 'project code' field
-        filter_kw = '{}'.format(loc)
+        filter_kw = '{}'.format(initials)
         # get the last record that has the same combination.
         lastrec = Subscriber.objects.filter(
             id_code__startswith=filter_kw).last()
@@ -320,14 +321,14 @@ class Subscriber(models.Model):
                 lastrec = str(lastrec.id_code)[-2:]
                 newrec = int(lastrec)+1
             # the record should be in Charfield format, 2-digits, non-unique just in case there is a number above 99 (very unlikely)
-            newnum = "{:08d}".format(int(newrec))
+            newnum = "{:06d}".format(int(newrec))
             self.id_code = '{}{}'.format(filter_kw, str(newnum))
 
         elif self.id_code == None:
             lastrec = '00'
             newrec = int(lastrec)+1
 
-            newnum = "{:08d}".format(int(newrec))
+            newnum = "{:06d}".format(int(newrec))
             self.id_code = '{}{}'.format(filter_kw, str(newnum))
         else:
             pass
@@ -396,11 +397,11 @@ class Assign(models.Model):
     def age(self):
         now = datetime.now()
         dob = self.date_of_birth
-        dod = self.deceased_at
-        if dod is not None:
-            delta = relativedelta(dod, dob)
-        else:
-            delta = relativedelta(now, dob)
+        # dod = self.deceased_at
+        # if dod is not None:
+        #     delta = relativedelta(dod, dob)
+        # else:
+        delta = relativedelta(now, dob)
         return delta.years
 
 
