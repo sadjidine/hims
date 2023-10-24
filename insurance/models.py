@@ -20,6 +20,7 @@
 #
 #############################################################################
 
+from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -28,8 +29,11 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 
+from phonenumber_field.modelfields import PhoneNumberField
+from shortuuid.django_fields import ShortUUIDField
+
 from core.models import Company, Locality, Grouping
-# from medical.models import MedicineCategory, Codification
+
 
 # Create your models here.
 GENDER_MALE = 0
@@ -62,7 +66,7 @@ BLOOD_GRP_CHOICES = [
 ]
 
 
-class SubscriptionPlan(models.Model):
+class Membership(models.Model):
 
     DAY = 0
     WEEK = 1
@@ -191,13 +195,13 @@ class PlanCategory(models.Model):
         (ALL, _('All'))
     ]
 
-    subscription_plan = models.ForeignKey(
-        SubscriptionPlan, on_delete=models.RESTRICT)
+    membership = models.ForeignKey(
+        Membership, on_delete=models.RESTRICT)
     category = models.ForeignKey(
         to='medical.MedicineCategory', on_delete=models.RESTRICT)
-    gender = models.IntegerField(
+    gender = models.PositiveSmallIntegerField(
         _('Gender'), choices=GENDER_CHOICES, default=None)
-    relationship = models.IntegerField(
+    relationship = models.PositiveSmallIntegerField(
         _('Relationship'), choices=RELATIONSHIP_CHOICES, default=None)
     is_ticket_due = models.BooleanField(_('Is Ticket Due'), default=True)
     individual_maxi_service = models.PositiveSmallIntegerField(
@@ -223,12 +227,12 @@ class PlanCategory(models.Model):
 
     class Meta:
         verbose_name_plural = _('Plan Categories')
-        unique_together = ('category', 'subscription_plan')
+        unique_together = ('category', 'membership')
 
 
 class PlanCodification(models.Model):
-    subscription_plan = models.ForeignKey(
-        SubscriptionPlan, on_delete=models.RESTRICT)
+    membership = models.ForeignKey(
+        Membership, on_delete=models.RESTRICT)
     codification = models.ForeignKey(
         to='medical.Codification', on_delete=models.RESTRICT)
     public_rate = models.PositiveSmallIntegerField(_('Public Rate'), validators=[
@@ -253,40 +257,69 @@ class PlanCodification(models.Model):
         return self.codification.code
 
     class Meta:
-        unique_together = ('codification', 'subscription_plan')
+        unique_together = ('codification', 'membership')
 
 
-class Subscriber(models.Model):
+class Patient(models.Model):
     # Subscriber models
+    SPOUSE = 0
+    CHILD = 1
+
+    RELATIONSHIP_CHOICES = [
+        (SPOUSE, _('Spouse')),
+        (CHILD, _('Child')),
+    ]
+    uuid_code = ShortUUIDField(
+        length=12,
+        max_length=40,
+        # prefix="id_",
+        # alphabet="abcdefg1234",
+        unique=True,
+        editable=False
+    )
     id_code = models.CharField(
         _("ID. Code"), max_length=50, unique=True, editable=False)
+    external_id_code = models.CharField(
+        _('External ID'), max_length=12, help_text="Set External ID for this Patient.", null=True, blank=True)
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=32)
-    matricule = models.CharField(max_length=12)
     locality = models.ForeignKey(
         Locality, on_delete=models.SET_NULL, null=True, blank=True)
-    grouping = models.ForeignKey(
-        Grouping, on_delete=models.SET_NULL, null=True, blank=True)
-    gender = models.IntegerField(choices=GENDER_CHOICES)
+    gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
-    blood_group = models.IntegerField(
-        choices=BLOOD_GRP_CHOICES, default=None, null=True, blank=True)
-    mobile = models.CharField(max_length=10, blank=True, null=True)
+    blood_group = models.PositiveSmallIntegerField(
+        choices=BLOOD_GRP_CHOICES, null=True, blank=True)
+    relationship = models.PositiveSmallIntegerField(
+        _('Relationship'), choices=RELATIONSHIP_CHOICES, null=True, blank=True)
+    phone_number = PhoneNumberField(blank=True, null=True)
+    mobile_1 = PhoneNumberField(blank=True, null=True)
+    mobile_2 = PhoneNumberField(blank=True, null=True)
     # deceased_at = models.DateField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to='photos')
     """ create_at = models.DateField(
-        _('Creation Date'), auto_now_add=True)
+        _('Creation Date'), auto_now_add=True
     modified_at = models.DateField(_('Modified Date'), auto_now=True) """
     is_active = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.last_name} {self.first_name}"
-
+    @property
     def full_name(self):
         return f"{self.last_name} {self.first_name}"
 
+    def __str__(self):
+        return self.full_name
+
+    @property
+    def parental_status(self):
+        if self.relationship == 0:
+            return _('Spouse')
+        elif self.relationship == 1:
+            return _('Child')
+        else:
+            return _('Subscriber')
+
+    @property
     def age(self):
         now = datetime.now()
         dob = self.date_of_birth
@@ -333,76 +366,44 @@ class Subscriber(models.Model):
         else:
             pass
 
-        super(Subscriber, self).save(*args, **kwargs)
+        super(Patient, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('first_name', 'last_name')
+        # abstract = True
 
 
-class Police(models.Model):
-    subscriber = models.ForeignKey(Subscriber, on_delete=models.RESTRICT)
-    subscription_plan = models.ForeignKey(
-        SubscriptionPlan, on_delete=models.RESTRICT)
-    begin_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.subscriber.lastName} {self.subscriber.firstName}"
-
-    class Meta:
-        unique_together = ('subscriber', 'subscription_plan')
-
-
-class Assign(models.Model):
-    SPOUSE = 0
-    CHILD = 1
-
-    RELATIONSHIP_CHOICES = [
-        (SPOUSE, _('Spouse')),
-        (CHILD, _('Child')),
-    ]
-    police = models.ForeignKey(
-        Police, on_delete=models.RESTRICT, related_name='assigns')
-    id_code = models.CharField(
-        _("ID. Code"), max_length=50, unique=True, editable=False)
-    first_name = models.CharField(max_length=128)
-    last_name = models.CharField(max_length=32)
-    gender = models.IntegerField(choices=GENDER_CHOICES)
-    date_of_birth = models.DateField(_('Date of birth'))
-    relationship = models.IntegerField(
-        _('Relationship'), choices=RELATIONSHIP_CHOICES, default=None)
-    locality = models.ForeignKey(
-        Locality, on_delete=models.SET_NULL, null=True, blank=True)
+class Subscriber(Patient):
+    matricule = models.CharField(max_length=12, null=True, blank=True)
     grouping = models.ForeignKey(
         Grouping, on_delete=models.SET_NULL, null=True, blank=True)
-    blood_group = models.IntegerField(
-        choices=BLOOD_GRP_CHOICES, default=None, null=True, blank=True)
-    photo = models.ImageField(null=True, blank=True, upload_to='photos')
-    mobile = models.CharField(max_length=10, blank=True, null=True)
-    # deceased_at = models.DateField(_('Deceased at'), null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-    is_stopped = models.BooleanField(default=True)
-    create_at = models.DateField(
-        _('Creation Date'), auto_now_add=True)
-    modified_at = models.DateField(_('Modified Date'), auto_now=True)
-    is_active = models.BooleanField(default=True)
-    note = models.TextField(blank=True, null=True)
+
+    @property
+    def parental_status(self):
+        return _('Member')
+
+
+class Subscription(models.Model):
+    police = models.CharField(
+        _("Police ID."), max_length=50, unique=True, editable=False)
+    subscriber = models.ForeignKey(Subscriber, on_delete=models.RESTRICT)
+    membership = models.ForeignKey(
+        Membership, on_delete=models.RESTRICT)
+    begin_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.last_name} {self.first_name}"
+        return f"{self.subscriber.last_name} {self.subscriber.first_name}"
 
-    def full_name(self):
-        return f"{self.last_name} {self.first_name}"
+    class Meta:
+        unique_together = ('subscriber', 'membership')
 
-    def age(self):
-        now = datetime.now()
-        dob = self.date_of_birth
-        # dod = self.deceased_at
-        # if dod is not None:
-        #     delta = relativedelta(dod, dob)
-        # else:
-        delta = relativedelta(now, dob)
-        return delta.years
+
+class Assign(Patient):
+    subscription = models.ForeignKey(
+        Subscription, on_delete=models.RESTRICT, related_name='assigns')
 
 
 class Scholarship(models.Model):
@@ -420,10 +421,10 @@ class Scholarship(models.Model):
 
 
 class Suspension(models.Model):
-    subscriber = models.ForeignKey(
-        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
-    assign = models.ForeignKey(
-        Assign, on_delete=models.RESTRICT, blank=True, null=True)
+    patient = models.ForeignKey(
+        Patient, on_delete=models.RESTRICT, blank=True, null=True)
+    # assign = models.ForeignKey(
+    #     Assign, on_delete=models.RESTRICT, blank=True, null=True)
     start_date = models.DateField(_('begin date'))
     end_date = models.DateField(_('end date'))
     reason = models.TextField(_('Suspension Reason'))
@@ -433,26 +434,18 @@ class Suspension(models.Model):
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        if self.subscriber:
-            return self.subscriber__full_name
-        if self.assign:
-            return self.assign__full_name
+        return self.patient.full_name
 
 
 class Decease(models.Model):
-    subscriber = models.ForeignKey(
-        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
-    assisgn = models.ForeignKey(
-        Assign, on_delete=models.RESTRICT, blank=True, null=True)
+    patient = models.ForeignKey(
+        Patient, on_delete=models.RESTRICT)
     deceased_at = models.DateField(_('Deceased at'))
     document = models.FileField(upload_to='documents')
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        if self.subscriber:
-            return self.subscriber__full_name
-        if self.assign:
-            return self.assign__full_name
+        return self.patient.full_name
 
 
 class Claim(models.Model):
@@ -471,10 +464,10 @@ class Claim(models.Model):
 
 class ClainItem(models.Model):
     claim = models.ForeignKey(Claim, on_delete=models.RESTRICT)
-    subscriber = models.ForeignKey(
-        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
-    assign = models.ForeignKey(
-        Assign, on_delete=models.RESTRICT, blank=True, null=True)
+    patient = models.ForeignKey(
+        Patient, on_delete=models.RESTRICT, blank=True, null=True)
+    # assign = models.ForeignKey(
+    #     Assign, on_delete=models.RESTRICT, blank=True, null=True)
     care_center = models.CharField(max_length=255)
     pathology = models.ForeignKey(
         to='medical.Pathology', on_delete=models.RESTRICT)
@@ -489,7 +482,4 @@ class ClainItem(models.Model):
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        if self.subscriber:
-            return self.subscriber.full_name
-        if self.assign:
-            return self.assign.full_name
+        return self.patient.full_name

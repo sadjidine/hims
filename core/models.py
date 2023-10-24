@@ -21,19 +21,24 @@
 #############################################################################
 
 
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
 from django_countries.fields import CountryField
+from phonenumber_field.modelfields import PhoneNumberField
+
 
 # Create your models here.
-
-
 class Company(models.Model):
     name = models.CharField(max_length=255)
     acronym = models.CharField(max_length=32, unique=True)
     country = CountryField()
     address = models.CharField(max_length=64, null=True)
+    phone_number = PhoneNumberField(blank=True, null=True)
+    mobile_1 = PhoneNumberField(blank=True, null=True)
+    mobile_2 = PhoneNumberField(blank=True, null=True)
     logo = models.ImageField(upload_to='images')
     note = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -120,3 +125,9 @@ class Locality(models.Model):
     class Meta:
         unique_together = ('name', 'region')
         verbose_name_plural = _("Localities")
+
+
+class User(AbstractUser):
+    email = models.EmailField(unique=True)
+    health_center = models.ForeignKey(
+        'medical.HealthCenter', on_delete=models.RESTRICT, null=True, blank=True)

@@ -1,20 +1,26 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 
-from insurance.models import SubscriptionPlan, PlanCategory, PlanCodification, Subscriber, Police, Assign, Scholarship, Suspension, Decease, Claim, ClainItem
+from insurance.models import Membership, PlanCategory, PlanCodification, Patient, Subscriber, Subscription, Assign, Scholarship, Suspension, Decease, Claim, ClainItem
 
 
 # Register your models here.
+@admin.register(Patient)
+class PatientAdmin(admin.ModelAdmin):
+    list_display = ('id_code', 'full_name', 'gender', 'age',
+                    'parental_status', 'mobile_1', 'email')
+
+
 @admin.register(Subscriber)
 class SubscriberAdmin(ImportExportModelAdmin):
     list_display = ('id_code', 'full_name', 'matricule',
-                    'gender', 'age', 'mobile', 'email')
+                    'gender', 'age', 'mobile_1', 'email')
 
 
 @admin.register(Assign)
 class AssignAdmin(admin.ModelAdmin):
     list_display = ('id_code', 'full_name', 'gender', 'age',
-                    'relationship', 'mobile', 'email')
+                    'relationship', 'mobile_1', 'email')
 
 
 class AssignInline(admin.TabularInline):
@@ -22,8 +28,8 @@ class AssignInline(admin.TabularInline):
     extra = 0
 
 
-@admin.register(Police)
-class PoliceAdmin(admin.ModelAdmin):
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
     inlines = [AssignInline]
 
 
@@ -51,8 +57,8 @@ class PlanCodificationInline(admin.TabularInline):
     extra = 0
 
 
-@admin.register(SubscriptionPlan)
-class SubscriptionPlanAdmin(admin.ModelAdmin):
+@admin.register(Membership)
+class MembershipAdmin(admin.ModelAdmin):
     inlines = [PlanCategoryInline, PlanCodificationInline]
 
 

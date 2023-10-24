@@ -22,10 +22,12 @@ from django.utils.translation import gettext_lazy as _
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
     path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = _(
-    'Proximaas - HIMS (HealthCare Insurance Management System)')
-admin.site.site_title = _('Proximaas Administration')
-admin.site.index_title = _('HIMS - Admin Management')
+    'ProximaaS - HIMS (HealthCare Insurance Management System)')
+admin.site.site_title = _('Administration ')
+admin.site.index_title = _('ProximaaS - Admin Management')

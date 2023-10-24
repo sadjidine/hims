@@ -26,7 +26,9 @@ from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from insurance.models import Subscriber, Assign, Police, Scholarship, Suspension
+from phonenumber_field.modelfields import PhoneNumberField
+
+from insurance.models import Company, Patient, Subscriber, Assign, Membership, Scholarship, Suspension
 
 # Create your models here.
 STAR_ONE = 0
@@ -198,7 +200,7 @@ class Practitioner(models.Model):
         (FEMALE, _('Female')),
     ]
 
-    CorpReference = models.CharField(max_length=32)
+    CorpReference = models.CharField(max_length=32, blank=True, null=True)
     first_name = models.CharField(max_length=32)
     last_name = models.CharField(max_length=128)
     degree = models.ForeignKey(
@@ -207,17 +209,19 @@ class Practitioner(models.Model):
         Speciality, on_delete=models.PROTECT, null=True, blank=True)
     gender = models.IntegerField(choices=GENDER_CHOICES, default=None)
     date_of_birth = models.DateField(null=True, blank=True)
-    mobile = models.CharField(max_length=10, blank=True, null=True)
+    phone_number = PhoneNumberField(blank=True, null=True)
+    mobile = PhoneNumberField(blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to='photos')
     is_active = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.last_name} - {self.first_name}"
-
+    @property
     def full_name(self):
         return f"{self.last_name} - {self.first_name}"
+
+    def __str__(self):
+        return self.full_name
 
     class Meta:
         unique_together = ('first_name', 'last_name', 'date_of_birth')
@@ -238,34 +242,28 @@ class HealthCenter(models.Model):
     STAR_THREE = 2
     STAR_FOUR = 3
     STAR_FIVE = 4
-    STANDING_CHOICES = [
-        (STAR_ONE, '★'),
-        (STAR_TWO, '★★'),
-        (STAR_THREE, '★★★'),
-        (STAR_FOUR, '★★★★'),
-        (STAR_FIVE, '★★★★★')
-    ]
-    MRC = 0
-    SRC = 1
-    PHARMACY = 2
-    STATUS_CHOICES = [
-        (MRC, _('Mandatory Referral Center')),
-        (SRC, _('Standard Referral Center')),
-        (PHARMACY, _('Pharmacy'))
-    ]
+
+    # MRC = 0
+    # SRC = 1
+    # PHARMACY = 2
+    # STATUS_CHOICES = [
+    #     (MRC, _('Mandatory Referral Center')),
+    #     (SRC, _('Standard Referral Center')),
+    #     (PHARMACY, _('Pharmacy'))
+    # ]
     name = models.CharField(max_length=255)
     acronym = models.CharField(max_length=32, unique=True)
     center_type = models.ForeignKey(
         CenterType, on_delete=models.RESTRICT, blank=True)
-    status = models.IntegerField(choices=STATUS_CHOICES)
-    standing = models.IntegerField(
-        _('Standing'), choices=STANDING_CHOICES, default=None)
+    # status = models.IntegerField(choices=STATUS_CHOICES)
     country = CountryField()
     address = models.CharField(max_length=64, null=True)
     # logo = models.ImageField(upload_to='images')
-    mobile = models.CharField(max_length=10, blank=True, null=True)
+    phone_number = PhoneNumberField(blank=True, null=True)
+    mobile_1 = PhoneNumberField(blank=True, null=True)
+    mobile_2 = PhoneNumberField(blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
-    # staff = models.ManyToManyField(Practitioner, blank=True)
+    staff = models.ManyToManyField(Practitioner, related_name='centers')
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
@@ -279,23 +277,55 @@ class HealthCenter(models.Model):
         unique_together = ('acronym', 'country')
 
 
-class Staff(models.Model):
-    healthcenter = models.ForeignKey(HealthCenter, verbose_name=_(
-        'Health Center'), on_delete=models.RESTRICT)
-    practitioner = models.ForeignKey(Practitioner, on_delete=models.RESTRICT)
+# class Staff(models.Model):
+#     healthcenter = models.ForeignKey(HealthCenter, verbose_name=_(
+#         'Health Center'), on_delete=models.RESTRICT)
+#     practitioner = models.ForeignKey(Practitioner, on_delete=models.RESTRICT)
+#     create_at = models.DateField(
+#         _('Creation Date'), auto_now_add=True)
+#     modified_at = models.DateField(_('Modified Date'), auto_now=True)
+#     is_active = models.BooleanField(default=True)
+#     note = models.TextField(blank=True, null=True)
+
+#     def __str__(self):
+#         return f"{self.practitioner__full_name} - {self.healthcenter__name}"
+
+class Agreement(models.Model):
+    MRC = 0
+    SRC = 1
+    PHARMACY = 2
+    STATUS_CHOICES = [
+        (MRC, _('Mandatory Referral Center')),
+        (SRC, _('Standard Referral Center')),
+        (PHARMACY, _('Pharmacy'))
+    ]
+    STANDING_CHOICES = [
+        (STAR_ONE, '★'),
+        (STAR_TWO, '★★'),
+        (STAR_THREE, '★★★'),
+        (STAR_FOUR, '★★★★'),
+        (STAR_FIVE, '★★★★★')
+    ]
+    company = models.ForeignKey(
+        Company, on_delete=models.RESTRICT, related_name='agreements')
+    health_center = models.ForeignKey(
+        HealthCenter, on_delete=models.RESTRICT, related_name='approvals')
+    standing = models.IntegerField(
+        _('Standing'), choices=STANDING_CHOICES, default=None)
+    status = models.IntegerField(choices=STATUS_CHOICES)
+    agreement_date = models.DateField(
+        _('Agreement Date'), null=True, blank=True)
+    ref_document = models.FileField(
+        _('Ref. Document'), upload_to='document', null=True, blank=True)
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     is_active = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.practitioner__full_name} - {self.healthcenter__name}"
-
 
 class Service(models.Model):
-    healthcenter = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT, verbose_name=_(
-        'Health Center'), related_name='services', limit_choices_to={'status__icontains': 'Referral'})
+    agreement = models.ForeignKey(Agreement, on_delete=models.RESTRICT)
     nomenclature = models.ForeignKey(Nomenclature, on_delete=models.RESTRICT)
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
@@ -321,14 +351,19 @@ class Service(models.Model):
         return self.nomenclature__name
 
 
-class MedicalCare(models.Model):
-    subscriber = models.ForeignKey(
-        Subscriber, on_delete=models.RESTRICT, blank=True, null=True)
-    assign = models.ForeignKey(
-        Assign, on_delete=models.RESTRICT, blank=True, null=True)
+class HealthCare(models.Model):
+    patient = models.ForeignKey(
+        Patient, on_delete=models.RESTRICT, blank=True, null=True)
+    # assign = models.ForeignKey(
+    #     Assign, on_delete=models.RESTRICT, blank=True, null=True)
     doc_reference = models.CharField(
         _('Doc. Reference'), max_length=24, blank=True, null=True)
-    care_center = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT)
+    mrc_center = models.ForeignKey(
+        HealthCenter, on_delete=models.RESTRICT, related_name='mrc_center', limit_choices_to={'status': 0})
+    src_center = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT,
+                                   related_name='src_center', limit_choices_to={'status': 1})
+    pharmacy = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT,
+                                 related_name='pharmacy', limit_choices_to={'status': 2})
     pathology = models.ForeignKey(Pathology, on_delete=models.RESTRICT)
     create_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
@@ -336,17 +371,13 @@ class MedicalCare(models.Model):
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        if self.subscriber:
-            return self.subscriber.full_name
-        if self.assign:
-            return self.assign.full_name
+        return self.patient.full_name
 
 
 class CareItem(models.Model):
-    healthcare = models.ForeignKey(MedicalCare, on_delete=models.RESTRICT)
+    health_care = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
     service = models.ForeignKey(
         Service, on_delete=models.RESTRICT, blank=True, null=True)
-    staff = models.ForeignKey(Staff, on_delete=models.RESTRICT)
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     quantity = models.PositiveSmallIntegerField(default=0)
@@ -362,7 +393,7 @@ class CareItem(models.Model):
 
 
 class MedicationItem(models.Model):
-    healthcare = models.ForeignKey(MedicalCare, on_delete=models.RESTRICT)
+    health_care = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
     pharmacy = models.ForeignKey(
         HealthCenter, on_delete=models.RESTRICT, limit_choices_to={'status': 2})
     supplied_at = models.DateField(
