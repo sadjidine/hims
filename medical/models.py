@@ -57,7 +57,7 @@ class Speciality(models.Model):
         verbose_name_plural = "Specialities"
 
 
-class MedicineCategory(models.Model):
+class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
     note = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -72,7 +72,7 @@ class MedicineCategory(models.Model):
 class Codification(models.Model):
     code = models.CharField(max_length=4, unique=True)
     label = models.CharField(max_length=64)
-    category = models.ForeignKey(MedicineCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     note = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
@@ -114,7 +114,7 @@ class Nomenclature(models.Model):
     is_price_required = models.BooleanField(
         _('Price Required'), help_text=_('Price required for this service?'), default=True)
     is_prior_agreement = models.BooleanField(_('Prior agreement'), help_text=_(
-        'Prior agreement is required for this service?'))
+        'Prior agreement is required for this service?'), default=True)
     note = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
@@ -264,7 +264,7 @@ class HealthCenter(models.Model):
     mobile_2 = PhoneNumberField(blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
     staff = models.ManyToManyField(Practitioner, related_name='centers')
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -281,7 +281,7 @@ class HealthCenter(models.Model):
 #     healthcenter = models.ForeignKey(HealthCenter, verbose_name=_(
 #         'Health Center'), on_delete=models.RESTRICT)
 #     practitioner = models.ForeignKey(Practitioner, on_delete=models.RESTRICT)
-#     create_at = models.DateField(
+#     created_at = models.DateField(
 #         _('Creation Date'), auto_now_add=True)
 #     modified_at = models.DateField(_('Modified Date'), auto_now=True)
 #     is_active = models.BooleanField(default=True)
@@ -317,14 +317,14 @@ class Agreement(models.Model):
         _('Agreement Date'), null=True, blank=True)
     ref_document = models.FileField(
         _('Ref. Document'), upload_to='document', null=True, blank=True)
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     is_active = models.BooleanField(default=True)
     note = models.TextField(blank=True, null=True)
 
 
-class Service(models.Model):
+class CareService(models.Model):
     agreement = models.ForeignKey(Agreement, on_delete=models.RESTRICT)
     nomenclature = models.ForeignKey(Nomenclature, on_delete=models.RESTRICT)
     unit_price = models.DecimalField(
@@ -341,7 +341,7 @@ class Service(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(100)], default=0)
     is_not_check = models.BooleanField(
         default=False, help_text='This service medical code is not for check.')
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -352,6 +352,18 @@ class Service(models.Model):
 
 
 class HealthCare(models.Model):
+
+    CONSULTATION = 0
+    DISPENSATION = 1
+    EXPIRED = 2
+    COMPLETED = 3
+
+    STATUS_CHOICES = (
+        (CONSULTATION, _('Consultation')),
+        (DISPENSATION, _('Dispensation')),
+        (EXPIRED, _('Expired')),
+        (COMPLETED, _('Completed')),
+    )
     patient = models.ForeignKey(
         Patient, on_delete=models.RESTRICT, blank=True, null=True)
     # assign = models.ForeignKey(
@@ -359,13 +371,15 @@ class HealthCare(models.Model):
     doc_reference = models.CharField(
         _('Doc. Reference'), max_length=24, blank=True, null=True)
     mrc_center = models.ForeignKey(
-        HealthCenter, on_delete=models.RESTRICT, related_name='mrc_center', limit_choices_to={'status': 0})
+        HealthCenter, on_delete=models.RESTRICT, related_name='mrc_center')
     src_center = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT,
-                                   related_name='src_center', limit_choices_to={'status': 1})
+                                   related_name='src_center', blank=True, null=True)
     pharmacy = models.ForeignKey(HealthCenter, on_delete=models.RESTRICT,
-                                 related_name='pharmacy', limit_choices_to={'status': 2})
+                                 related_name='pharmacy', blank=True, null=True)
     pathology = models.ForeignKey(Pathology, on_delete=models.RESTRICT)
-    create_at = models.DateField(
+    status = models.PositiveBigIntegerField(
+        _('Standing'), choices=STATUS_CHOICES, default=0)
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)
@@ -375,27 +389,48 @@ class HealthCare(models.Model):
 
 
 class CareItem(models.Model):
-    health_care = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
+    health_care = models.ForeignKey(
+        HealthCare, on_delete=models.RESTRICT, related_name='care_items')
     service = models.ForeignKey(
-        Service, on_delete=models.RESTRICT, blank=True, null=True)
+        CareService, on_delete=models.RESTRICT, blank=True, null=True)
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     quantity = models.PositiveSmallIntegerField(default=0)
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.service__nomenclature__name
+        return self.service.nomenclature.name
+
+
+class CareOnDemand(models.Model):
+    health_care = models.ForeignKey(
+        HealthCare, on_delete=models.RESTRICT, related_name='care_on_demand')
+    care_service = models.ForeignKey(
+        Nomenclature, on_delete=models.RESTRICT, limit_choices_to={'is_prior_agreement': True})
+    supplied_at = models.DateField(
+        _('Supply Date'), auto_now_add=True, editable=True)
+    quantity = models.PositiveSmallIntegerField(default=0)
+    unit_price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateField(
+        _('Creation Date'), auto_now_add=True, editable=True)
+    modified_at = models.DateField(_('Modified Date'), auto_now=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.service.nomenclature.name
 
 
 class MedicationItem(models.Model):
-    health_care = models.ForeignKey(HealthCare, on_delete=models.RESTRICT)
+    health_care = models.ForeignKey(
+        HealthCare, on_delete=models.RESTRICT, related_name='medication_items')
     pharmacy = models.ForeignKey(
-        HealthCenter, on_delete=models.RESTRICT, limit_choices_to={'status': 2})
+        HealthCenter, on_delete=models.RESTRICT)
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     medication = models.ForeignKey(
@@ -406,7 +441,7 @@ class MedicationItem(models.Model):
     quantity = models.PositiveSmallIntegerField(default=0)
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)

@@ -20,21 +20,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Agreement',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.IntegerField(choices=[(0, 'Mandatory Referral Center'), (1, 'Standard Referral Center'), (2, 'Pharmacy')])),
-                ('agreement_date', models.DateField(blank=True, null=True, verbose_name='Agreement Date')),
-                ('ref_document', models.FileField(blank=True, null=True, upload_to='document', verbose_name='Ref. Document')),
-                ('create_at', models.DateField(auto_now_add=True, verbose_name='Creation Date')),
-                ('modified_at', models.DateField(auto_now=True, verbose_name='Modified Date')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('status', models.IntegerField(choices=[
+                 (0, 'Mandatory Referral Center'), (1, 'Standard Referral Center'), (2, 'Pharmacy')])),
+                ('agreement_date', models.DateField(
+                    blank=True, null=True, verbose_name='Agreement Date')),
+                ('ref_document', models.FileField(blank=True, null=True,
+                 upload_to='document', verbose_name='Ref. Document')),
+                ('created_at', models.DateField(
+                    auto_now_add=True, verbose_name='Creation Date')),
+                ('modified_at', models.DateField(
+                    auto_now=True, verbose_name='Modified Date')),
                 ('is_active', models.BooleanField(default=True)),
                 ('note', models.TextField(blank=True, null=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='agreements', to='core.company')),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT,
+                 related_name='agreements', to='core.company')),
             ],
         ),
         migrations.CreateModel(
             name='CenterType',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64)),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -43,7 +51,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Codification',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=4, unique=True)),
                 ('label', models.CharField(max_length=64)),
                 ('note', models.TextField(blank=True, null=True)),
@@ -53,8 +62,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Degree',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=64, unique=True, verbose_name='Degree name')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=64,
+                 unique=True, verbose_name='Degree name')),
                 ('isA_ative', models.BooleanField(default=True)),
                 ('note', models.TextField(blank=True, null=True)),
             ],
@@ -62,42 +73,60 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='HealthCare',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doc_reference', models.CharField(blank=True, max_length=24, null=True, verbose_name='Doc. Reference')),
-                ('create_at', models.DateField(auto_now_add=True, verbose_name='Creation Date')),
-                ('modified_at', models.DateField(auto_now=True, verbose_name='Modified Date')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('doc_reference', models.CharField(blank=True,
+                 max_length=24, null=True, verbose_name='Doc. Reference')),
+                ('created_at', models.DateField(
+                    auto_now_add=True, verbose_name='Creation Date')),
+                ('modified_at', models.DateField(
+                    auto_now=True, verbose_name='Modified Date')),
                 ('note', models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
             name='HealthCenter',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('acronym', models.CharField(max_length=32, unique=True)),
-                ('standing', models.IntegerField(choices=[(0, '★'), (1, '★★'), (2, '★★★'), (3, '★★★★'), (4, '★★★★★')], default=None, verbose_name='Standing')),
+                ('standing', models.IntegerField(choices=[(0, '★'), (1, '★★'), (2, '★★★'), (
+                    3, '★★★★'), (4, '★★★★★')], default=None, verbose_name='Standing')),
                 ('country', django_countries.fields.CountryField(max_length=2)),
                 ('address', models.CharField(max_length=64, null=True)),
-                ('phone_number', phonenumber_field.modelfields.PhoneNumberField(blank=True, max_length=128, null=True, region=None)),
-                ('mobile_1', phonenumber_field.modelfields.PhoneNumberField(blank=True, max_length=128, null=True, region=None)),
-                ('mobile_2', phonenumber_field.modelfields.PhoneNumberField(blank=True, max_length=128, null=True, region=None)),
+                ('phone_number', phonenumber_field.modelfields.PhoneNumberField(
+                    blank=True, max_length=128, null=True, region=None)),
+                ('mobile_1', phonenumber_field.modelfields.PhoneNumberField(
+                    blank=True, max_length=128, null=True, region=None)),
+                ('mobile_2', phonenumber_field.modelfields.PhoneNumberField(
+                    blank=True, max_length=128, null=True, region=None)),
                 ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('create_at', models.DateField(auto_now_add=True, verbose_name='Creation Date')),
-                ('modified_at', models.DateField(auto_now=True, verbose_name='Modified Date')),
+                ('created_at', models.DateField(
+                    auto_now_add=True, verbose_name='Creation Date')),
+                ('modified_at', models.DateField(
+                    auto_now=True, verbose_name='Modified Date')),
                 ('is_active', models.BooleanField(default=True)),
                 ('note', models.TextField(blank=True, null=True)),
-                ('center_type', models.ForeignKey(blank=True, on_delete=django.db.models.deletion.RESTRICT, to='medical.centertype')),
+                ('center_type', models.ForeignKey(
+                    blank=True, on_delete=django.db.models.deletion.RESTRICT, to='medical.centertype')),
             ],
         ),
         migrations.CreateModel(
             name='Medication',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='International NonProprietary Name', max_length=64, unique=True)),
-                ('code', models.CharField(help_text='International NonProprietary Code', max_length=64)),
-                ('dosage', models.CharField(help_text='Set the dosage of the pharmaceutical product', max_length=64)),
-                ('indicative_price', models.DecimalField(decimal_places=0, default=0, max_digits=9)),
-                ('price_margin', models.DecimalField(decimal_places=0, default=0, max_digits=9)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(
+                    help_text='International NonProprietary Name', max_length=64, unique=True)),
+                ('code', models.CharField(
+                    help_text='International NonProprietary Code', max_length=64)),
+                ('dosage', models.CharField(
+                    help_text='Set the dosage of the pharmaceutical product', max_length=64)),
+                ('indicative_price', models.DecimalField(
+                    decimal_places=0, default=0, max_digits=9)),
+                ('price_margin', models.DecimalField(
+                    decimal_places=0, default=0, max_digits=9)),
                 ('product_timout', models.PositiveSmallIntegerField()),
                 ('minimum_age', models.PositiveSmallIntegerField()),
                 ('maximum_age', models.PositiveSmallIntegerField()),
@@ -108,7 +137,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MedicationType',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -117,7 +147,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MedicineCategory',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -129,7 +160,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Molecule',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -138,19 +170,27 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Nomenclature',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=4, unique=True)),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('coefficient', models.IntegerField(default=1)),
-                ('service_timeout', models.IntegerField(help_text='Service waiting delay in days.', verbose_name='Service Timeout')),
-                ('minimum_age', models.IntegerField(help_text='minimum age requirement allowed of this service', verbose_name='Minimum age')),
-                ('maximum_age', models.IntegerField(help_text='maximum age requirement allowed of this service', verbose_name='Maximum age')),
-                ('is_required_quantity', models.BooleanField(help_text='Is quantity required for this service?')),
-                ('is_price_required', models.BooleanField(default=True, help_text='Price required for this service?', verbose_name='Price Required')),
-                ('is_prior_agreement', models.BooleanField(help_text='Prior agreement is required for this service?', verbose_name='Prior agreement')),
+                ('service_timeout', models.IntegerField(
+                    help_text='Service waiting delay in days.', verbose_name='Service Timeout')),
+                ('minimum_age', models.IntegerField(
+                    help_text='minimum age requirement allowed of this service', verbose_name='Minimum age')),
+                ('maximum_age', models.IntegerField(
+                    help_text='maximum age requirement allowed of this service', verbose_name='Maximum age')),
+                ('is_required_quantity', models.BooleanField(
+                    help_text='Is quantity required for this service?')),
+                ('is_price_required', models.BooleanField(
+                    default=True, help_text='Price required for this service?', verbose_name='Price Required')),
+                ('is_prior_agreement', models.BooleanField(
+                    help_text='Prior agreement is required for this service?', verbose_name='Prior agreement')),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
-                ('codification', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='medical.codification')),
+                ('codification', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, to='medical.codification')),
             ],
             options={
                 'unique_together': {('code', 'name')},
@@ -159,7 +199,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Speciality',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -171,7 +212,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TherapeuticRoute',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('note', models.TextField()),
                 ('is_active', models.BooleanField(default=True)),
@@ -180,39 +222,58 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Service',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('unit_price', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('insurance_fixed_part', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('insured_fixed_part', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('rebate', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('discount', models.PositiveSmallIntegerField(default=0, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
-                ('coverage', models.PositiveSmallIntegerField(default=0, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
-                ('is_not_check', models.BooleanField(default=False, help_text='This service medical code is not for check.')),
-                ('create_at', models.DateField(auto_now_add=True, verbose_name='Creation Date')),
-                ('modified_at', models.DateField(auto_now=True, verbose_name='Modified Date')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('unit_price', models.DecimalField(
+                    decimal_places=2, default=0, max_digits=10)),
+                ('insurance_fixed_part', models.DecimalField(
+                    decimal_places=2, default=0, max_digits=10)),
+                ('insured_fixed_part', models.DecimalField(
+                    decimal_places=2, default=0, max_digits=10)),
+                ('rebate', models.DecimalField(
+                    decimal_places=2, default=0, max_digits=10)),
+                ('discount', models.PositiveSmallIntegerField(default=0, validators=[
+                 django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
+                ('coverage', models.PositiveSmallIntegerField(default=0, validators=[
+                 django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
+                ('is_not_check', models.BooleanField(default=False,
+                 help_text='This service medical code is not for check.')),
+                ('created_at', models.DateField(
+                    auto_now_add=True, verbose_name='Creation Date')),
+                ('modified_at', models.DateField(
+                    auto_now=True, verbose_name='Modified Date')),
                 ('is_active', models.BooleanField(default=True)),
                 ('note', models.TextField(blank=True, null=True)),
-                ('agreement', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='medical.agreement')),
-                ('nomenclature', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='medical.nomenclature')),
+                ('agreement', models.ForeignKey(
+                    on_delete=django.db.models.deletion.RESTRICT, to='medical.agreement')),
+                ('nomenclature', models.ForeignKey(
+                    on_delete=django.db.models.deletion.RESTRICT, to='medical.nomenclature')),
             ],
         ),
         migrations.CreateModel(
             name='Practitioner',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('CorpReference', models.CharField(blank=True, max_length=32, null=True)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('CorpReference', models.CharField(
+                    blank=True, max_length=32, null=True)),
                 ('first_name', models.CharField(max_length=32)),
                 ('last_name', models.CharField(max_length=128)),
-                ('gender', models.IntegerField(choices=[(0, 'Male'), (1, 'Female')], default=None)),
+                ('gender', models.IntegerField(choices=[
+                 (0, 'Male'), (1, 'Female')], default=None)),
                 ('date_of_birth', models.DateField(blank=True, null=True)),
-                ('phone_number', phonenumber_field.modelfields.PhoneNumberField(blank=True, max_length=128, null=True, region=None)),
-                ('mobile', phonenumber_field.modelfields.PhoneNumberField(blank=True, max_length=128, null=True, region=None)),
+                ('phone_number', phonenumber_field.modelfields.PhoneNumberField(
+                    blank=True, max_length=128, null=True, region=None)),
+                ('mobile', phonenumber_field.modelfields.PhoneNumberField(
+                    blank=True, max_length=128, null=True, region=None)),
                 ('email', models.EmailField(blank=True, max_length=254, null=True)),
                 ('photo', models.ImageField(blank=True, null=True, upload_to='photos')),
                 ('is_active', models.BooleanField(default=True)),
                 ('note', models.TextField(blank=True, null=True)),
-                ('degree', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='medical.degree')),
-                ('speciality', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='medical.speciality')),
+                ('degree', models.ForeignKey(blank=True, null=True,
+                 on_delete=django.db.models.deletion.PROTECT, to='medical.degree')),
+                ('speciality', models.ForeignKey(blank=True, null=True,
+                 on_delete=django.db.models.deletion.PROTECT, to='medical.speciality')),
             ],
             options={
                 'unique_together': {('first_name', 'last_name', 'date_of_birth')},
@@ -221,13 +282,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Pathology',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=4, unique=True)),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('is_chronic', models.BooleanField(default=False)),
                 ('note', models.TextField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
-                ('speciality', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='medical.speciality')),
+                ('speciality', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, to='medical.speciality')),
             ],
             options={
                 'verbose_name_plural': 'Pathologies',
@@ -236,24 +299,34 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MedicationItem',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('supplied_at', models.DateField(auto_now_add=True, verbose_name='Supply Date')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('supplied_at', models.DateField(
+                    auto_now_add=True, verbose_name='Supply Date')),
                 ('is_substitute', models.BooleanField(default=False)),
-                ('prescribed', models.CharField(blank=True, max_length=128, null=True, verbose_name='prescribed medication')),
+                ('prescribed', models.CharField(blank=True, max_length=128,
+                 null=True, verbose_name='prescribed medication')),
                 ('quantity', models.PositiveSmallIntegerField(default=0)),
-                ('unit_price', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('create_at', models.DateField(auto_now_add=True, verbose_name='Creation Date')),
-                ('modified_at', models.DateField(auto_now=True, verbose_name='Modified Date')),
+                ('unit_price', models.DecimalField(
+                    decimal_places=2, default=0, max_digits=10)),
+                ('created_at', models.DateField(
+                    auto_now_add=True, verbose_name='Creation Date')),
+                ('modified_at', models.DateField(
+                    auto_now=True, verbose_name='Modified Date')),
                 ('note', models.TextField(blank=True, null=True)),
-                ('health_care', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='medical.healthcare')),
-                ('medication', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='medical.medication')),
-                ('pharmacy', models.ForeignKey(limit_choices_to={'status': 2}, on_delete=django.db.models.deletion.RESTRICT, to='medical.healthcenter')),
+                ('health_care', models.ForeignKey(
+                    on_delete=django.db.models.deletion.RESTRICT, to='medical.healthcare')),
+                ('medication', models.ForeignKey(blank=True, null=True,
+                 on_delete=django.db.models.deletion.RESTRICT, to='medical.medication')),
+                ('pharmacy', models.ForeignKey(limit_choices_to={
+                 'status': 2}, on_delete=django.db.models.deletion.RESTRICT, to='medical.healthcenter')),
             ],
         ),
         migrations.AddField(
             model_name='medication',
             name='medication_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='medical.medicationtype'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to='medical.medicationtype'),
         ),
         migrations.AddField(
             model_name='medication',
@@ -263,61 +336,77 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='medication',
             name='therapeutic_route',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='medical.therapeuticroute'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='medical.therapeuticroute'),
         ),
         migrations.AddField(
             model_name='healthcenter',
             name='staff',
-            field=models.ManyToManyField(related_name='centers', to='medical.practitioner'),
+            field=models.ManyToManyField(
+                related_name='centers', to='medical.practitioner'),
         ),
         migrations.AddField(
             model_name='healthcare',
             name='mrc_center',
-            field=models.ForeignKey(limit_choices_to={'status': 0}, on_delete=django.db.models.deletion.RESTRICT, related_name='mrc_center', to='medical.healthcenter'),
+            field=models.ForeignKey(limit_choices_to={
+                                    'status': 0}, on_delete=django.db.models.deletion.RESTRICT, related_name='mrc_center', to='medical.healthcenter'),
         ),
         migrations.AddField(
             model_name='healthcare',
             name='pathology',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='medical.pathology'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.RESTRICT, to='medical.pathology'),
         ),
         migrations.AddField(
             model_name='healthcare',
             name='patient',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='insurance.patient'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='insurance.patient'),
         ),
         migrations.AddField(
             model_name='healthcare',
             name='pharmacy',
-            field=models.ForeignKey(limit_choices_to={'status': 2}, on_delete=django.db.models.deletion.RESTRICT, related_name='pharmacy', to='medical.healthcenter'),
+            field=models.ForeignKey(limit_choices_to={
+                                    'status': 2}, on_delete=django.db.models.deletion.RESTRICT, related_name='pharmacy', to='medical.healthcenter'),
         ),
         migrations.AddField(
             model_name='healthcare',
             name='src_center',
-            field=models.ForeignKey(limit_choices_to={'status': 1}, on_delete=django.db.models.deletion.RESTRICT, related_name='src_center', to='medical.healthcenter'),
+            field=models.ForeignKey(limit_choices_to={
+                                    'status': 1}, on_delete=django.db.models.deletion.RESTRICT, related_name='src_center', to='medical.healthcenter'),
         ),
         migrations.AddField(
             model_name='codification',
             name='category',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='medical.medicinecategory'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='medical.medicinecategory'),
         ),
         migrations.CreateModel(
             name='CareItem',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('supplied_at', models.DateField(auto_now_add=True, verbose_name='Supply Date')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('supplied_at', models.DateField(
+                    auto_now_add=True, verbose_name='Supply Date')),
                 ('quantity', models.PositiveSmallIntegerField(default=0)),
-                ('unit_price', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('create_at', models.DateField(auto_now_add=True, verbose_name='Creation Date')),
-                ('modified_at', models.DateField(auto_now=True, verbose_name='Modified Date')),
+                ('unit_price', models.DecimalField(
+                    decimal_places=2, default=0, max_digits=10)),
+                ('created_at', models.DateField(
+                    auto_now_add=True, verbose_name='Creation Date')),
+                ('modified_at', models.DateField(
+                    auto_now=True, verbose_name='Modified Date')),
                 ('note', models.TextField(blank=True, null=True)),
-                ('health_care', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='medical.healthcare')),
-                ('service', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='medical.service')),
+                ('health_care', models.ForeignKey(
+                    on_delete=django.db.models.deletion.RESTRICT, to='medical.healthcare')),
+                ('service', models.ForeignKey(blank=True, null=True,
+                 on_delete=django.db.models.deletion.RESTRICT, to='medical.service')),
             ],
         ),
         migrations.AddField(
             model_name='agreement',
             name='health_center',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='approvals', to='medical.healthcenter'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT,
+                                    related_name='approvals', to='medical.healthcenter'),
         ),
         migrations.AlterUniqueTogether(
             name='medication',

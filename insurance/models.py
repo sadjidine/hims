@@ -105,8 +105,8 @@ class Membership(models.Model):
         Company, on_delete=models.RESTRICT, related_name='policies')
     validity_delay = models.PositiveSmallIntegerField(
         _('Validity'), help_text='Medical Care Validity Delay!', default=0)
-    standing = models.IntegerField(
-        _('Standing'), choices=STANDING_CHOICES, default=None)
+    standing = models.PositiveBigIntegerField(
+        _('Standing'), choices=STANDING_CHOICES, default=0)
     is_gender_gontrol = models.BooleanField(
         _('Is Gender Control'), default=True)
     waiting_delay = models.PositiveSmallIntegerField(
@@ -153,8 +153,8 @@ class Membership(models.Model):
         _('Maximum Spouse'), help_text=_('Allowed Spouse Limited Number allowed!'), default=0)
     insurance_premium = models.DecimalField(
         _('Insurance Premium'), max_digits=9, decimal_places=0, default=0)
-    premium_cycle = models.IntegerField(
-        _('Premium Cycle'), choices=PREMIUM_CYCLE_CHOICES, default=None)
+    premium_cycle = models.PositiveSmallIntegerField(
+        _('Premium Cycle'), choices=PREMIUM_CYCLE_CHOICES, default=0)
     min_tolerated_amount = models.DecimalField(
         _('Min. Tolerated Amount'), max_digits=6, decimal_places=0, default=0)
     is_active = models.BooleanField(default=True)
@@ -198,7 +198,7 @@ class PlanCategory(models.Model):
     membership = models.ForeignKey(
         Membership, on_delete=models.RESTRICT)
     category = models.ForeignKey(
-        to='medical.MedicineCategory', on_delete=models.RESTRICT)
+        to='medical.Category', on_delete=models.RESTRICT)
     gender = models.PositiveSmallIntegerField(
         _('Gender'), choices=GENDER_CHOICES, default=None)
     relationship = models.PositiveSmallIntegerField(
@@ -297,7 +297,7 @@ class Patient(models.Model):
     # deceased_at = models.DateField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to='photos')
-    """ create_at = models.DateField(
+    """ created_at = models.DateField(
         _('Creation Date'), auto_now_add=True
     modified_at = models.DateField(_('Modified Date'), auto_now=True) """
     is_active = models.BooleanField(default=True)
@@ -335,7 +335,7 @@ class Patient(models.Model):
         initials = str(self.first_name.strip())[
             0:1] + str(self.last_name.strip())[0:1]
         # gets the last 2 digits from the project start date year.
-        # yy = str(self.create_at.year)[-2:]
+        # yy = str(self.created_at.year)[-2:]
         # makes a database query to find any matching Dept-Year combination in the 'project code' field
         filter_kw = '{}'.format(initials)
         # get the last record that has the same combination.
@@ -410,7 +410,7 @@ class Scholarship(models.Model):
     assign = models.ForeignKey(Assign, on_delete=models.RESTRICT)
     start_date = models.DateField(_('begin date'))
     end_date = models.DateField(_('end date'))
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     document = models.FileField(upload_to='documents')
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
@@ -428,7 +428,7 @@ class Suspension(models.Model):
     start_date = models.DateField(_('begin date'))
     end_date = models.DateField(_('end date'))
     reason = models.TextField(_('Suspension Reason'))
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)
@@ -454,7 +454,7 @@ class Claim(models.Model):
         _('Doc. Reference'), max_length=24, blank=True, null=True)
     requested_at = models.DateField(
         _('Requested Date'))
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
 
@@ -476,7 +476,7 @@ class ClainItem(models.Model):
     quantity = models.PositiveSmallIntegerField(default=0)
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
-    create_at = models.DateField(
+    created_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)
