@@ -72,7 +72,8 @@ class Category(models.Model):
 class Codification(models.Model):
     code = models.CharField(max_length=4, unique=True)
     label = models.CharField(max_length=64)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, related_name='codifications')
     note = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
@@ -86,7 +87,8 @@ class Codification(models.Model):
 class Pathology(models.Model):
     code = models.CharField(max_length=4, unique=True)
     name = models.CharField(max_length=64, unique=True)
-    speciality = models.ForeignKey(Speciality, on_delete=models.PROTECT)
+    speciality = models.ForeignKey(
+        Speciality, on_delete=models.PROTECT, related_name='pathologies')
     is_chronic = models.BooleanField(default=False)
     note = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -101,13 +103,14 @@ class Pathology(models.Model):
 class Nomenclature(models.Model):
     code = models.CharField(max_length=4, unique=True)
     name = models.CharField(max_length=64, unique=True)
-    codification = models.ForeignKey(Codification, on_delete=models.PROTECT)
-    coefficient = models.IntegerField(default=1)
-    service_timeout = models.IntegerField(
+    codification = models.ForeignKey(
+        Codification, on_delete=models.PROTECT, related_name='nomenclature')
+    coefficient = models.PositiveSmallIntegerField(default=1)
+    service_timeout = models.PositiveSmallIntegerField(
         _('Service Timeout'), help_text=_('Service waiting delay in days.'))
-    minimum_age = models.IntegerField(_('Minimum age'), help_text=_(
+    minimum_age = models.PositiveSmallIntegerField(_('Minimum age'), help_text=_(
         'minimum age requirement allowed of this service'))
-    maximum_age = models.IntegerField(_('Maximum age'), help_text=_(
+    maximum_age = models.PositiveSmallIntegerField(_('Maximum age'), help_text=_(
         'maximum age requirement allowed of this service'))
     is_required_quantity = models.BooleanField(
         help_text="Is quantity required for this service?")
@@ -353,16 +356,18 @@ class CareService(models.Model):
 
 class HealthCare(models.Model):
 
-    CONSULTATION = 0
+    CREATION = 0
     DISPENSATION = 1
-    EXPIRED = 2
-    COMPLETED = 3
+    ORIENTATION = 2
+    EXPIRATION = 3
+    COMPLETION = 4
 
     STATUS_CHOICES = (
-        (CONSULTATION, _('Consultation')),
+        (CREATION, _('Consultation')),
         (DISPENSATION, _('Dispensation')),
-        (EXPIRED, _('Expired')),
-        (COMPLETED, _('Completed')),
+        (ORIENTATION, _('Orientation')),
+        (EXPIRATION, _('Expired')),
+        (COMPLETION, _('Completed')),
     )
     patient = models.ForeignKey(
         Patient, on_delete=models.RESTRICT, blank=True, null=True)
@@ -378,7 +383,7 @@ class HealthCare(models.Model):
                                  related_name='pharmacy', blank=True, null=True)
     pathology = models.ForeignKey(Pathology, on_delete=models.RESTRICT)
     status = models.PositiveBigIntegerField(
-        _('Standing'), choices=STATUS_CHOICES, default=0)
+        _('Status'), choices=STATUS_CHOICES, default=0)
     created_at = models.DateField(
         _('Creation Date'), auto_now_add=True, editable=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
@@ -391,8 +396,10 @@ class HealthCare(models.Model):
 class CareItem(models.Model):
     health_care = models.ForeignKey(
         HealthCare, on_delete=models.RESTRICT, related_name='care_items')
+    health_center = models.ForeignKey(
+        HealthCenter, on_delete=models.RESTRICT, related_name='care_items')
     service = models.ForeignKey(
-        CareService, on_delete=models.RESTRICT, blank=True, null=True)
+        CareService, on_delete=models.RESTRICT, related_name='care_items')
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     quantity = models.PositiveSmallIntegerField(default=0)
@@ -409,9 +416,11 @@ class CareItem(models.Model):
 
 class CareOnDemand(models.Model):
     health_care = models.ForeignKey(
-        HealthCare, on_delete=models.RESTRICT, related_name='care_on_demand')
+        HealthCare, on_delete=models.RESTRICT, related_name='on_demand_care_items')
+    health_center = models.ForeignKey(
+        HealthCenter, on_delete=models.RESTRICT, related_name='on_demand_care_items')
     care_service = models.ForeignKey(
-        Nomenclature, on_delete=models.RESTRICT, limit_choices_to={'is_prior_agreement': True})
+        Nomenclature, on_delete=models.RESTRICT, related_name='on_demand_care_items', limit_choices_to={'is_prior_agreement': True})
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     quantity = models.PositiveSmallIntegerField(default=0)
@@ -430,21 +439,23 @@ class MedicationItem(models.Model):
     health_care = models.ForeignKey(
         HealthCare, on_delete=models.RESTRICT, related_name='medication_items')
     pharmacy = models.ForeignKey(
-        HealthCenter, on_delete=models.RESTRICT)
+        HealthCenter, on_delete=models.RESTRICT, related_name='medication_items')
     supplied_at = models.DateField(
         _('Supply Date'), auto_now_add=True, editable=True)
     medication = models.ForeignKey(
-        Medication, on_delete=models.RESTRICT, blank=True, null=True)
+        Medication, on_delete=models.RESTRICT, related_name='medication_items')
     is_substitute = models.BooleanField(default=False)
     prescribed = models.CharField(
         _('prescribed medication'), max_length=128, blank=True, null=True)
+    delivered_at = models.DateField(
+        _('Delivered Date'), auto_now_add=True, editable=True)
     quantity = models.PositiveSmallIntegerField(default=0)
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
     created_at = models.DateField(
-        _('Creation Date'), auto_now_add=True, editable=True)
+        _('Creation Date'), auto_now_add=True)
     modified_at = models.DateField(_('Modified Date'), auto_now=True)
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.medication__name
+        return self.medication.name

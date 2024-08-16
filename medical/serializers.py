@@ -1,4 +1,4 @@
-from rest_frameworks import serializers
+from rest_framework import serializers
 from medical.models import Category, Speciality, Codification, Pathology, \
     Nomenclature, Molecule, MedicationType, TherapeuticRoute, Medication, \
     CenterType, HealthCenter, Agreement, CareService, Practitioner, HealthCare, CareItem, CareOnDemand, MedicationItem
